@@ -1,0 +1,25 @@
+@charset "ISO-8859-1";
+
+body {
+	margin: 40px auto;
+	max-width: 650px;
+	line-height: 1.6;
+	font-size: 18px;
+	color: #444;
+	padding: 0 10px
+}
+
+h1, h2, h3 {
+	line-height: 1.2
+}
+
+span {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+.thead-primary {
+	color: #fff;
+	background-color: #1d7ce2;
+	border-color: #454d55;
+}
