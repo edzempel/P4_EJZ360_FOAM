@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 import edu.metrostate.ics425.foam.model.Athlete;
 
-public class RosterDemo {
+public class Roster {
 	private String url = "jdbc:mysql://localhost/foam";
 	private String user = "root";
 	private String password = "";
@@ -27,6 +27,45 @@ public class RosterDemo {
 			athletes = null;
 		}
 		return athletes;
+	}
+
+	public boolean isOnRoster(String id) {
+		boolean output = false;
+		try (Connection con = DriverManager.getConnection(url, user, password);
+				Statement stmt = con.createStatement();
+				ResultSet rs = stmt.executeQuery(query);) {
+			while (rs.next()) {
+				if (rs.getString("NationalID").equalsIgnoreCase(id)) {
+					output = true;
+				}
+
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return output;
+	}
+
+	public Athlete find(String id) {
+		// TODO: implement find
+		return null;
+	}
+
+	public boolean delete(String id) {
+		// TODO: implement delete
+		return false;
+	}
+
+	public boolean update(Athlete anAthlete) {
+		// TODO: implement update
+		return false;
+
+	}
+
+	public boolean add(Athlete anAthlete) {
+		// TODO: implement add
+		return false;
 	}
 
 	public static void main(String[] args) {
@@ -65,19 +104,19 @@ public class RosterDemo {
 //
 //			e.printStackTrace();
 //		}
-		RosterDemo rd = new RosterDemo();
+		Roster rd = new Roster();
 		List<Athlete> athletes = rd.findAll();
 		for (Athlete athlete : athletes) {
-			System.out.println((AthleteBean)athlete);
+			System.out.println((AthleteBean) athlete);
 		}
-		
+
 	}
 
 	private List<Athlete> getAthletes(ResultSet rs) throws SQLException {
 		ArrayList<Athlete> athletes = new ArrayList<Athlete>();
-		AthleteBean athlete = new AthleteBean();
 
 		while (rs.next()) {
+			AthleteBean athlete = new AthleteBean();
 			String nationalID = rs.getString("NationalID");
 			String firstName = rs.getString("FirstName");
 			String lastName = rs.getString("LastName");
