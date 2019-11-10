@@ -11,9 +11,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import edu.metrostate.ics425.foam.data.Roster;
-import edu.metrostate.ics425.foam.data.RosterException;
+//import edu.metrostate.ics425.foam.data.Roster;
+//import edu.metrostate.ics425.foam.data.RosterException;
 import edu.metrostate.ics425.p4.ejz360.model.AthleteBean;
+import edu.metrostate.ics425.p4.ejz360.model.Roster;
 
 /**
  * Servlet implementation class FoamServlet
@@ -74,7 +75,7 @@ public class FoamServlet extends HttpServlet {
 				request.setAttribute("roster", rosterDB.findAll());
 				url = "/index.jsp";
 			}
-		} catch (RosterException e) {
+		} catch (Exception e) {
 			errList.put("Roster error", "Unable to access roster.");
 		}
 		if (!errList.isEmpty()) {
@@ -102,7 +103,7 @@ public class FoamServlet extends HttpServlet {
 				request.setAttribute("roster", rosterDB.findAll());
 				url = "/index.jsp";
 			}
-		} catch (RosterException e) {
+		} catch (Exception e) {
 			errList.put("Roster error", "Unable to access roster.");
 		}
 
@@ -127,13 +128,13 @@ public class FoamServlet extends HttpServlet {
 			} else {
 				errList.put("Unkown ID", String.format("Athlete with id: %s is no longer on the roster.", id));
 			}
-		} catch (RosterException e) {
+		} catch (Exception e) {
 			errList.put("Delete error", "Unable to delete athlete " + id);
 		}
 
 		try {
 			request.setAttribute("roster", rosterDB.findAll());
-		} catch (RosterException e) {
+		} catch (Exception e) {
 			errList.put("Roster error", "Unable to read roster.");
 		}
 
@@ -198,8 +199,8 @@ public class FoamServlet extends HttpServlet {
 				} else {
 					errId = "false";
 				}
-				
-				//validate last name
+
+				// validate last name
 				String newLast = request.getParameter("newLast");
 				newLast = newLast != null ? newLast.trim() : null;
 				String errLast = null;
@@ -211,7 +212,7 @@ public class FoamServlet extends HttpServlet {
 				} else {
 					errLast = "false";
 				}
-				
+
 				// validate first name
 				String newFirst = request.getParameter("newFirst").trim();
 				newFirst = newFirst != null ? newFirst.trim() : null;
@@ -224,7 +225,7 @@ public class FoamServlet extends HttpServlet {
 				} else {
 					errFirst = "false";
 				}
-				
+
 				// validate date of birth
 				String newDobString = request.getParameter("newDob");
 				newDobString = newDobString != null ? newDobString.trim() : null;
@@ -274,7 +275,8 @@ public class FoamServlet extends HttpServlet {
 						errId = "true";
 						feedbackIdMessage = String.format("%s is no longer in the roster.", newId);
 						errList.put("Update error", String.format(
-								"Athlete with id '%s' is no longer on the roster. Click cancel or add athlete to create a new athlete.", newId));
+								"Athlete with id '%s' is no longer on the roster. Click cancel or add athlete to create a new athlete.",
+								newId));
 						request.setAttribute("updateDisabled", true);
 						request.setAttribute("addEnabled", true);
 					}
@@ -291,12 +293,10 @@ public class FoamServlet extends HttpServlet {
 				request.setAttribute("errDob", errDob);
 				request.setAttribute("feedbackDobMessage", feedbackDobMessage);
 
-			} catch (RosterException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 				errList.put("errRoster",
 						String.format("Unable to add athlete: %s. ", request.getParameter("newId")) + e.getMessage());
-			} catch (Exception ex) {
-				errList.put("errMsg", String.format("%s.", ex.getMessage()));
 			} finally {
 				if (!errList.isEmpty()) {
 					url = "add".equals(mode) ? "/add.jsp" : "edit.jsp";
@@ -314,7 +314,7 @@ public class FoamServlet extends HttpServlet {
 		// Send lists of all athletes to the view
 		try {
 			request.setAttribute("roster", rosterDB.findAll());
-		} catch (RosterException e) {
+		} catch (Exception e) {
 			errList.put("Roster error", "Unable to send roster to browser. " + e.getMessage());
 		}
 		request.setAttribute("errMsg", errList);
@@ -326,21 +326,12 @@ public class FoamServlet extends HttpServlet {
 	public void init() throws ServletException {
 		super.init();
 		var sc = getServletContext();
-		String virtualPath = sc.getInitParameter("filePath");
-		String realPath = sc.getRealPath(virtualPath);
+//		String virtualPath = sc.getInitParameter("filePath");
+//		String realPath = sc.getRealPath(virtualPath);
 
-		if (realPath != null) {
-			Roster.initialize(realPath);
-
-			try {
-				Roster rosterDB = Roster.getInstance();
-				sc.setAttribute("rosterDB", rosterDB);
-				sc.setAttribute("roster", rosterDB.findAll());
-			} catch (RosterException e) {
-				System.out.println("Unable to create roster. " + e.getMessage());
-				e.printStackTrace();
-			}
-		}
+		Roster rosterDB = new Roster();
+		sc.setAttribute("rosterDB", rosterDB);
+		sc.setAttribute("roster", rosterDB.findAll());
 
 	}
 
