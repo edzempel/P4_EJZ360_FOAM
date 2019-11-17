@@ -2,6 +2,7 @@ package edu.metrostate.ics425.p4.ejz360.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 //import static org.junit.jupiter.api.Assertions.fail;
 
@@ -48,6 +49,8 @@ public class RosterTest {
 
 	@Test
 	public void find() {
+		assertNull(rosterDB.find(ID_NOT_EXIST));
+		
 		// '1', 'FD399', 'Jarmo', 'Jokihaara', '1998-03-26'
 		AthleteBean athlete = new AthleteBean();
 		athlete = (AthleteBean) rosterDB.find("FD399");
@@ -57,6 +60,7 @@ public class RosterTest {
 		assertEquals("Jokihaara", athlete.getLastName());
 		assertEquals("1998-03-26", athlete.getDateOfBirth().toString());
 
+		
 	}
 
 	@Test
@@ -66,15 +70,12 @@ public class RosterTest {
 			assertTrue(rosterDB.delete("123456"));
 		}
 
-		AthleteBean athlete = new AthleteBean();
-		athlete.setNationalID("123456");
-		athlete.setFirstName("Edward");
-		athlete.setLastName("Zempel");
-		athlete.setDateOfBirth(LocalDate.parse("2000-10-12"));
+		AthleteBean athlete = getGenericAthlete();
 
 		assertTrue(rosterDB.add(athlete));
 		// add the same athlete a second time should fail
 		assertFalse(rosterDB.add(athlete));
+		assertFalse(rosterDB.add(null));
 
 		athlete = (AthleteBean) rosterDB.find("123456");
 		assertEquals("123456", athlete.getNationalID());
@@ -93,11 +94,7 @@ public class RosterTest {
 			assertTrue(rosterDB.delete("123456"));
 		}
 
-		AthleteBean athlete = new AthleteBean();
-		athlete.setNationalID("123456");
-		athlete.setFirstName("Edward");
-		athlete.setLastName("Zempel");
-		athlete.setDateOfBirth(LocalDate.parse("2000-10-12"));
+		AthleteBean athlete = getGenericAthlete();
 
 		assertTrue(rosterDB.add(athlete));
 
@@ -112,11 +109,31 @@ public class RosterTest {
 
 		athlete.setNationalID(ID_NOT_EXIST);
 		assertFalse(rosterDB.update(athlete));
+		
+		assertFalse(rosterDB.update(null));
 
 		assertTrue(rosterDB.isOnRoster("123456"));
 
 		assertTrue(rosterDB.delete("123456"));
 
+	}
+
+	private AthleteBean getGenericAthlete() {
+		AthleteBean athlete = new AthleteBean();
+		athlete.setNationalID("123456");
+		athlete.setFirstName("Edward");
+		athlete.setLastName("Zempel");
+		athlete.setDateOfBirth(LocalDate.parse("2000-10-12"));
+		return athlete;
+	}
+	
+	@Test
+	public void delete() {
+		assertFalse(rosterDB.delete(ID_NOT_EXIST));
+		
+		AthleteBean athlete = getGenericAthlete();
+		assertTrue(rosterDB.add(athlete));
+		assertTrue(rosterDB.delete(athlete.getNationalID()));
 	}
 
 }
