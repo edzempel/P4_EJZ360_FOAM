@@ -9,22 +9,24 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 
-
 import edu.metrostate.ics425.foam.model.Athlete;
 
+/**
+ * P4 Roster Class provides connectivity to foam to MySQL database
+ * 
+ * @author ezempel
+ *
+ */
 public class Roster {
-//	private String url = "jdbc:mysql://localhost/foam";
-//	private String user = "root";
-//	private String password = "";
+	private boolean testMode = false;
 	private final String SELECT_ALL_QUERY = "SELECT NationalID, FirstName, LastName, DateOfBirth FROM foam.Athletes";
-	
-	private DataSource dataSource = getDataSource();
 
 	private DataSource getDataSource() {
 		DataSource dataSource = null;
@@ -39,16 +41,43 @@ public class Roster {
 		return dataSource;
 	}
 
+	private Connection getConn() throws SQLException {
+		// Used for JUnit testing
+		String url = "jdbc:mysql://localhost/foam";
+		String user = "foamapp";
+		String password = "ics425";
+
+		if (testMode) {
+			return DriverManager.getConnection(url, user, password);
+		} else {
+			return getDataSource().getConnection();
+		}
+
+	}
+
+	/**
+	 * Set test mode to true to use with JUnit. False if using with connection pool.
+	 * 
+	 * @param mode true for JUnit, false for connection pool
+	 */
+	public void setTestMode(boolean mode) {
+		this.testMode = mode;
+	}
+
 //	 1. Connect to the database
 //	 2. create query statement
 //	 3. execute query
 //	 4. display the results
 //	 5. close the results and query and the connection
-
+	/**
+	 * Returns a list containing all athletes on the roster
+	 * 
+	 * @return List of athletes
+	 */
 	public List<Athlete> findAll() {
 		List<Athlete> athletes;
-		try (Connection con = dataSource.getConnection();
-//				Connection con = DriverManager.getConnection(url, user, password);
+		try (Connection con = getConn();
+
 				Statement stmt = con.createStatement();
 				ResultSet rs = stmt.executeQuery(SELECT_ALL_QUERY);) {
 			athletes = getAthletes(rs);
@@ -60,8 +89,7 @@ public class Roster {
 
 	public boolean isOnRoster(String id) {
 		boolean output = false;
-		try (Connection con = dataSource.getConnection();
-//				Connection con = DriverManager.getConnection(url, user, password);
+		try (Connection con = getConn();
 				Statement stmt = con.createStatement();
 				ResultSet rs = stmt.executeQuery(SELECT_ALL_QUERY);) {
 			while (rs.next()) {
@@ -83,8 +111,8 @@ public class Roster {
 		String findQuery = "Select NationalID, FirstName, LastName, DateOfBirth "
 				+ "FROM foam.Athletes WHERE NationalID = ?";
 		if (id != null && isOnRoster(id)) {
-			try (Connection con = dataSource.getConnection();
-//					Connection con = DriverManager.getConnection(url, user, password);
+			try (Connection con = getConn();
+
 					PreparedStatement ps = getFindPreparedStatement(con, findQuery, id);
 					ResultSet rs = ps.executeQuery();) {
 				while (rs.next()) {
@@ -119,8 +147,8 @@ public class Roster {
 		int deleted = 0;
 		String deleteQuery = "DELETE FROM foam.Athletes WHERE NationalID = ?";
 		if (id != null && isOnRoster(id)) {
-			try (Connection con = dataSource.getConnection();
-//					Connection con = DriverManager.getConnection(url, user, password);
+			try (Connection con = getConn();
+
 					PreparedStatement ps = getFindPreparedStatement(con, deleteQuery, id);) {
 				deleted = ps.executeUpdate();
 
@@ -136,8 +164,8 @@ public class Roster {
 		String updateQuery = "UPDATE foam.Athletes SET " + "FirstName = ?, " + "LastName = ?, " + "DateOfBirth = ? "
 				+ "WHERE NationalID = ?";
 		if (anAthlete != null && isOnRoster(anAthlete.getNationalID())) {
-			try (Connection con = dataSource.getConnection();
-//					Connection con = DriverManager.getConnection(url, user, password);
+			try (Connection con = getConn();
+
 					Statement stmt = con.createStatement();
 					PreparedStatement ps = con.prepareStatement(updateQuery);) {
 				ps.setString(1, anAthlete.getFirstName());
@@ -156,13 +184,19 @@ public class Roster {
 
 	}
 
+	/**
+	 * Adds the specified athlete to the roster. If an athlete with the same
+	 * NationalID already exists the roster is unchanged.
+	 * 
+	 * @param anAthlete athlete to add
+	 * @return true if successfully added, false otherwise
+	 */
 	public boolean add(Athlete anAthlete) {
 		int added = 0;
 		String addQuery = "INSERT INTO foam.Athletes (NationalID, FirstName, LastName, DateOfBirth) "
 				+ "VALUES (?,?,?,?)";
 		if (anAthlete != null && !isOnRoster(anAthlete.getNationalID())) {
-			try (Connection con = dataSource.getConnection();
-//					Connection con = DriverManager.getConnection(url, user, password);
+			try (Connection con = getConn();
 					Statement stmt = con.createStatement();
 					PreparedStatement ps = con.prepareStatement(addQuery);) {
 				ps.setString(1, anAthlete.getNationalID());
