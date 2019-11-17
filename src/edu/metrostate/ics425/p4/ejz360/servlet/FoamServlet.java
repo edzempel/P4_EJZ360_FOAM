@@ -316,6 +316,7 @@ public class FoamServlet extends HttpServlet {
 			request.setAttribute("roster", rosterDB.findAll());
 		} catch (Exception e) {
 			errList.put("Roster error", "Unable to send roster to browser. " + e.getMessage());
+			e.printStackTrace();
 		}
 		request.setAttribute("errMsg", errList);
 		// Forward control to the view
