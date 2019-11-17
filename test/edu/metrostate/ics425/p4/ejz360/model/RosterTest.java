@@ -12,6 +12,13 @@ import org.junit.*;
 
 import edu.metrostate.ics425.foam.model.Athlete;
 
+/**
+ * JUnit Test class for P4 Roster This class worked before implementing the
+ * connection pool using the driver directly
+ * 
+ * @author ezempel
+ *
+ */
 public class RosterTest {
 	private static final String ID_NOT_EXIST = "xxxx";
 	private static Roster rosterDB;
@@ -19,6 +26,7 @@ public class RosterTest {
 	@BeforeClass
 	public static void setupRoster() {
 		rosterDB = new Roster();
+		rosterDB.setTestMode(true);
 
 	}
 
@@ -65,6 +73,7 @@ public class RosterTest {
 		athlete.setDateOfBirth(LocalDate.parse("2000-10-12"));
 
 		assertTrue(rosterDB.add(athlete));
+		// add the same athlete a second time should fail
 		assertFalse(rosterDB.add(athlete));
 
 		athlete = (AthleteBean) rosterDB.find("123456");
@@ -100,7 +109,7 @@ public class RosterTest {
 		assertEquals("George", athlete.getFirstName());
 		assertEquals("Zempel", athlete.getLastName());
 		assertEquals("2000-10-12", athlete.getDateOfBirth().toString());
-		
+
 		athlete.setNationalID(ID_NOT_EXIST);
 		assertFalse(rosterDB.update(athlete));
 
