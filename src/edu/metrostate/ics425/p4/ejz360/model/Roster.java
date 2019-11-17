@@ -188,7 +188,6 @@ public class Roster {
 			String nationalID = rs.getString("NationalID");
 			String firstName = rs.getString("FirstName");
 			String lastName = rs.getString("LastName");
-//			LocalDate dob = LocalDate.parse(rs.getDate("DateOfBirth").toString());
 			Date date = rs.getDate("DateOfBirth");
 			LocalDate dob = convertToLocalDateViaSqlDate(date);
 			athlete.setNationalID(nationalID);
